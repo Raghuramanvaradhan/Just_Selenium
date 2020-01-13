@@ -1,0 +1,45 @@
+package tests.rest;
+
+import java.util.List;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import io.restassured.response.ResponseBody;
+
+public class RailAPI {
+
+	public static void main(String[] args) {
+		Response response = RestAssured.given().when().get("https://api.railwayapi.com/v2/between/source/mas/dest/tpj/date/13-01-2020/apikey/h4kc05vsiu/").then().contentType(ContentType.JSON)
+				.extract().response();
+		int temp ,temp2,temp3;
+		int max =0;
+		JsonPath jPath = response.jsonPath();
+		List<Object> _trainNumberList = jPath.getList("trains.number");
+		for(int i = 0;i<_trainNumberList.size();i++) {
+			temp = Integer.parseInt(_trainNumberList.get(i).toString());
+			Response response2 = RestAssured.given().when().get("https://api.railwayapi.com/v2/route/train/"+temp+"/apikey/h4kc05vsiu/");
+			ResponseBody body = response2.getBody();
+			JsonPath j2 = body.jsonPath();
+			List<Object> routSize = j2.getList("route.no");
+			temp2 = routSize.size();
+			if(temp2>max) {
+				max = temp2;
+				temp3 = i;
+				if(i==_trainNumberList.size()-1) {
+					System.out.println("Trains number: "+jPath.getString("trains["+temp3+"].number"));
+				}
+			}
+
+		}
+
+	}
+
+
+
+
+
+
+}
+
